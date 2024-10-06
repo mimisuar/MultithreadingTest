@@ -11,59 +11,17 @@ namespace MoreMultithreading
 			RenderWindow window = new RenderWindow(new VideoMode(800, 600), "Multithreaded");
 			MessageQueue.Instance.Initialize();
 
-			Grid grid = new(800, 600, 40, 40);
-
-			bool holdingShift = false;
+			GridController gridController = new(800, 600, 40, 40);
+			gridController.GenerateGrid();
 
 			window.Closed += (obj, args) => 
 			{
 				window.Close();
 			};
 
-			window.MouseButtonPressed += (obj, args) =>
-			{
-				int gridX = args.X / grid.TileWidth;
-				int gridY = args.Y / grid.TileHeight;
-
-				if (args.Button == Mouse.Button.Left)
-				{
-					if (holdingShift)
-					{
-						grid.MoveGoal(gridX, gridY);
-					}
-					else
-					{
-						grid.MoveStart(gridX, gridY);
-					}
-				}
-				else if (args.Button == Mouse.Button.Right)
-				{
-					grid.ToggleTile(gridX, gridY);
-				}
-
-				
-			};
-
-			window.KeyPressed += (obj, args) =>
-			{
-				if (args.Code == Keyboard.Key.R)
-				{
-					grid.GenerateGrid();
-				}
-
-				if (args.Code == Keyboard.Key.LShift)
-				{
-					holdingShift = true;
-				}
-			};
-
-			window.KeyReleased += (obj, args) =>
-			{
-				if (args.Code == Keyboard.Key.LShift)
-				{
-					holdingShift = false;
-				}
-			};
+			window.MouseButtonPressed += gridController.OnMousePressed;
+			window.KeyPressed += gridController.OnKeyPressed;
+			window.KeyReleased += gridController.OnKeyReleased;
 
 			Clock clock = new();
 			float lastTime = clock.ElapsedTime.AsSeconds();
@@ -78,7 +36,7 @@ namespace MoreMultithreading
 				window.DispatchEvents();
 
 				window.Clear();
-				grid.Render(window);
+				gridController.Render(window);
 				MessageQueue.Instance.Render(window);
 				window.Display();
 
